@@ -1,0 +1,14 @@
+
+app/venv1/
+
+app/uploads/
+
+app/__pycache__/
+
+app/streamlit.logs
+
+bitcoin_data/
+
+index_data/
+
+esplora/

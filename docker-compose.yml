@@ -1,0 +1,51 @@
+services:
+  bitcoind:
+    container_name: bitcoind
+    build:
+      context: .
+      dockerfile: Dockerfile_bitcoin  # Custom Dockerfile name
+    command: ["--conf=/root/bitcoin.conf"]
+    restart: always
+    volumes:
+      - ./bitcoin.conf:/root/bitcoin.conf
+      - ./bitcoin_data:/root/.bitcoin/regtest
+    ports:
+      - "18443:18443"  # Bitcoin RPC port
+    networks:
+      - bitcoin_network
+
+  ord:
+    container_name: ord
+    build:
+      context: .
+      dockerfile: Dockerfile_ord
+    volumes:
+      - ./index_data:/index-data
+      - ./bitcoin_data:/root/.bitcoin/regtest
+      - ./app:/root/app/.
+    command:  ["ordinal.sh"]
+    ports:
+      - "8080:80"
+    depends_on:
+      - bitcoind
+    networks:
+      - bitcoin_network
+
+  esplora:
+    container_name: esplora
+    build:
+      context: ./esplora
+    command:  ["./run.sh"]
+    volumes:
+      - ./bitcoin_data:/data/bitcoin/regtest
+    ports:
+      - "8094:80"
+    environment:
+      DAEMON_RPC: bitcoind:18443
+    depends_on:
+      - bitcoind
+    networks: 
+      - bitcoin_network
+
+networks:
+  bitcoin_network:
