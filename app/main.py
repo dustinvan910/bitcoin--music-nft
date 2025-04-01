@@ -15,7 +15,7 @@ st.session_state.current_balance = balance_output
 st.metric(label="Balance", value=st.session_state.current_balance * 1e-8)
 
 # File upload section
-uploaded_file = st.file_uploader("Choose a file to inscribe", type=['png', 'jpg', 'jpeg', 'gif'])
+uploaded_file = st.file_uploader("Choose a file to inscribe", type=['bin','html','png', 'jpg', 'jpeg', 'gif', "js", "mid", "mp3"])
 
 if uploaded_file is not None:
     # Display the uploaded file
