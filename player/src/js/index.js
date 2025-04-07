@@ -1,15 +1,13 @@
 
 srcFile = "/content/c1ef3f41627282e2222de1f283991f70809fc00fcad21bd121da6f8d920ab3bei0"
-srcFile = "./src/audio/SERENATA.MID"
+srcFile = "./src/audio/serenata.MID"
 const txID = new Date().getTime() - 0
 
 var Instrument = ["AMSynth", "DuoSynth", "MembraneSynth", "FMSynth", "MonoSynth", "Piano"]
 var EDO = [5]
 
-
 const hash = txID % Instrument.length;
 const hashEDO = txID % EDO.length;
-
 
 const selectedInstrument = Instrument[hash];
 // const selectedInstrument = "Piano";
@@ -37,6 +35,12 @@ const noteNames = [
     'C8'
 ];
 
+// Analyser for Spectrogram
+let fftSize = 2048
+const analyzer = new Tone.Analyser("fft", fftSize);
+let fftInterval
+window.fftWindows = [];
+
 const baseURL = "https://tonejs.github.io/audio/salamander/";
 
 // Create an object to store blob URLs
@@ -45,6 +49,7 @@ const blobUrls = {};
 // Preload all audio files and create blob URLs
 var samplerNotes
 var sampler
+
 Promise.all(noteNames.map(async note => {
     blobUrls[note] = "";
     if (selectedInstrument == "Piano") {
@@ -79,22 +84,22 @@ Promise.all(noteNames.map(async note => {
                 console.log("track", track.name)
                 switch (selectedInstrument) {
                     case "FMSynth":
-                        var synth = new Tone.FMSynth().toMaster();
+                        var synth = new Tone.FMSynth().connect(analyzer).toMaster();
                         break;
                     case "AMSynth":
-                        synth = new Tone.AMSynth().toMaster();
+                        synth = new Tone.AMSynth().connect(analyzer).toMaster();
                         break;
                     case "DuoSynth":
-                        synth = new Tone.DuoSynth().toMaster();
+                        synth = new Tone.DuoSynth().connect(analyzer).toMaster();
                         break;
                     case "MembraneSynth":
-                        synth = new Tone.MembraneSynth().toMaster();
+                        synth = new Tone.MembraneSynth().connect(analyzer).toMaster();
                         break;
                     case "MonoSynth":
-                        synth = new Tone.MonoSynth().toMaster();
+                        synth = new Tone.MonoSynth().connect(analyzer).toMaster();
                         break;
                     case "Piano":
-                        synth = new Tone.Sampler(samplerNotes).toMaster();
+                        synth = new Tone.Sampler(samplerNotes).connect(analyzer).toMaster();
                         break;
                 }
     
@@ -108,6 +113,20 @@ Promise.all(noteNames.map(async note => {
                 const now = Tone.now() 
                 const playbackSpeed = 0.7 + Math.random() * 0.8; // Random speed between 0.7 and 1.5
                 console.log("playbackSpeed", playbackSpeed)
+
+
+                let intervalTime = (128/Tone.context.sampleRate)*100
+                // Start polling FFT windows when playback begins
+                fftInterval = setInterval(() => {
+                    const fftData = analyzer.getValue();
+                    // Store the FFT data
+                    window.fftWindows.push([...fftData]);
+                    if(window.fftWindows.length > 512) {
+                        window.fftWindows.shift();
+                    }
+                    // Uncomment to draw real time (can be slow)
+                    drawSpectrogram();
+                }, intervalTime);
                 
                 // Function to play one iteration of the song
                 id = 1
@@ -151,10 +170,79 @@ Promise.all(noteNames.map(async note => {
                 }
                 // Clear all scheduled events when stopping
                 Tone.Transport.cancel();
+                clearInterval(fftInterval);
+                //drawSpectrogram();
             }
         })
     })
 
 })
 
+
+function drawSpectrogram() {
+    const canvas = document.getElementById('spectrogram');
+    const ctx = canvas.getContext('2d');
+    const fftDataArray = window.fftWindows;
+    ctx.imageSmoothingEnabled = false;
+
+    if (!fftDataArray || fftDataArray.length === 0) {
+        requestAnimationFrame(drawSpectrogram);
+        return;
+    }
+    
+    
+    const sampleRate = Tone.context.sampleRate;
+    const fftSize = analyzer.size * 2;
+    const maxFreq = 6000;
+    const maxBin = Math.floor((maxFreq / sampleRate) * fftSize / 2);
+
+    const numCols = fftDataArray.length;
+    const colScale = 4;
+    const rowScale = 4;
+
+    const a = 1664525;
+    const c = 1013904223;
+    const m = 4294967296;
+
+    seed = (a * txID + c) % m;
+    let random1 = (seed / m) * 360;
+
+    seed = (a * seed + c) % m;
+    let random2 = (seed / m) * 360;
+
+    // Use these for your colors
+    const baseHue = random1;
+    const oppositeHue = random2;
+    const saturation = Math.floor((((random1+random2)*100)/720)*25)+75;
+    const lightStart = 10;
+    const lightEnd = 100;
+
+    // Set background to base color
+    document.body.style.backgroundColor = `hsl(${baseHue}, ${saturation}%, 10%)`;
+    document.getElementById("Description").style.color = "white";
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    fftDataArray.forEach((fftData, colIndex) => {
+        fftData.slice(0, maxBin).forEach((value, rowIndex) => {
+            // Normalize FFT value
+            const fraction = Math.min(Math.max((value + 100) * 0.7 / 100, 0), 1);
+
+            // Interpolate color
+            const diff = oppositeHue - baseHue;
+            const shortestPath = ((diff + 180) % 360) - 180;
+            const hue = (baseHue + shortestPath * fraction + 360) % 360;
+            
+            const lightness = lightStart + (lightEnd - lightStart) * fraction;
+
+            ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+            const x = canvas.width/2 - Math.floor(numCols/2)*colScale + colIndex*colScale
+            const y = canvas.height - (rowIndex + 1) * rowScale;
+
+            ctx.fillRect(x, y, colScale, rowScale);
+        });
+    });
+    requestAnimationFrame(drawSpectrogram);
+}
 
