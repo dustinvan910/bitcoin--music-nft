@@ -25,11 +25,12 @@ EXPOSE 8080
 
 SHELL ["/bin/bash", "-c"]
 
-COPY ./ordinal.sh /usr/local/bin/.
-RUN chmod +x /usr/local/bin/ordinal.sh
-
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONIOENCODING=UTF-8
 
 RUN apt-get update
 RUN apt-get install -y python3.12-full
+RUN apt-get install -y ffmpeg
+
+COPY ./ordinal.sh /usr/local/bin/.
+RUN chmod +x /usr/local/bin/ordinal.sh

@@ -1,0 +1,11 @@
+FROM mtgupf/essentia:latest
+
+RUN apt update
+
+RUN apt install python3.8-full -y
+
+COPY essentia.sh /essentia.sh
+
+RUN chmod +x /essentia.sh
+
+ENTRYPOINT ["bash","/essentia.sh"]

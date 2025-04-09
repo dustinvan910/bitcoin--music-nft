@@ -30,22 +30,28 @@ curl --user foo:bar \
     else: print(stderr)
 
 def topup(n = 0):
-    stdout, stderr = execute_command("ord -r --bitcoin-rpc-url=http://bitcoind:18443 wallet receive")
-    if stdout != {}:
-        print(stdout["addresses"][0])
-        address= stdout["addresses"][0]
-    else: print(stderr)
-
-    balance,_ = get_balance()
-    if balance == 0:
-        generate_block(200, address)
+    if n == 0:
+        balance,_ = get_balance()
+        if balance == 0:
+            stdout, stderr = execute_command("ord -r --bitcoin-rpc-url=http://bitcoind:18443 wallet receive")
+            if stdout != {}:
+                print("topup",n,stdout["addresses"][0])
+                address= stdout["addresses"][0]
+            else: print(stderr)
+            generate_block(200, address)
     else:
+        stdout, stderr = execute_command("ord -r --bitcoin-rpc-url=http://bitcoind:18443 wallet receive")
+        if stdout != {}:
+            print("topup",n,stdout["addresses"][0])
+            address= stdout["addresses"][0]
+        else: print(stderr)
         generate_block(n, address)
         
-def create_inscription(file_path):
+def create_inscription(file_path, generate_block = True):
     stdout, stderr = execute_command(f"ord -r --bitcoin-rpc-url bitcoind:18443 wallet inscribe --fee-rate 10 --file \"{file_path}\"")
     if stdout != {}:
-        topup(1)
+        if generate_block:
+            topup(1)
         return stdout, None
     else: print(stderr)
     

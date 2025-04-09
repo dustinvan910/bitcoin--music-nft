@@ -47,5 +47,19 @@ services:
     networks: 
       - bitcoin_network
 
+  essentia:
+    container_name: essentia
+    build:
+      context: .
+      dockerfile: Dockerfile_essentia
+    volumes:
+      - ./essentia:/essentia
+    ports:
+      - "8095:5000"
+    depends_on:
+      - bitcoind
+      - ord
+    networks:
+      - bitcoin_network
 networks:
   bitcoin_network:

@@ -12,3 +12,11 @@ bitcoin_data/
 index_data/
 
 esplora/
+
+essentia/.venv/
+
+app/venv2/
+
+app/separated/
+
+player/node_modules/
