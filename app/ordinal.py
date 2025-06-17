@@ -48,7 +48,7 @@ def topup(n = 0):
         generate_block(n, address)
         
 def create_inscription(file_path, generate_block = True):
-    stdout, stderr = execute_command(f"ord -r --bitcoin-rpc-url bitcoind:18443 wallet inscribe --fee-rate 10 --file \"{file_path}\"")
+    stdout, stderr = execute_command(f"ord -r --bitcoin-rpc-url bitcoind:18443 wallet inscribe --fee-rate 2 --file \"{file_path}\"")
     if stdout != {}:
         if generate_block:
             topup(1)

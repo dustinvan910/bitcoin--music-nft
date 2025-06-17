@@ -41,7 +41,7 @@ exports = module.exports = function(collectionName, itemId, options){
                 </div>
                 <div class="detail-item">
                     <span class="label">Playback Speed:</span>
-                    <span class="value">x${options.playbackSpeed.toFixed(2)}</span>
+                    <span class="value">x${Number(options.playbackSpeed).toFixed(2)}</span>
                 </div>
             </div>
             

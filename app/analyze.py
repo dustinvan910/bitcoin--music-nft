@@ -29,7 +29,7 @@ def midi2mp3(input_file):
     subprocess.run(['ffmpeg', '-i', wav_file, '-codec:a', 'libmp3lame', '-qscale:a', '2', mp3_file])
     
     # Remove temporary WAV file
-    os.remove(wav_file)
+    # os.remove(wav_file)
     return mp3_file
 
 # Import the Data

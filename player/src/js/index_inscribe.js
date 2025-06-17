@@ -1,12 +1,15 @@
+
 // Get the script tag and its attributes
-const scriptTag = document.getElementsByTagName('script')[0];
+const scriptTag = document.querySelector('script[collection]');
 const contentId = scriptTag ? scriptTag.getAttribute('id') : null;
 const collection = scriptTag ? scriptTag.getAttribute('collection') : null;
 const itemId = scriptTag ? scriptTag.getAttribute('item-id') : null;
 
 console.log('Script Tag ID:', contentId);
-console.log('Collection:', collection); 
+console.log('Collection:', collection);
 console.log('Item ID:', itemId);
+
+
 
 const SRC_MIDI = "/content/" + contentId
 const TONEJS_URL = "/content/" + "6f6f0fa29e7463db53c5514cafb7a7943cb42786557cb230b3655199e32d981di0"
@@ -46,16 +49,19 @@ const SAMPLE_URL = {
 }
 const noteNames = Object.keys(SAMPLE_URL);
 const Instrument = ["AMSynth", "DuoSynth", "MembraneSynth", "FMSynth", "MonoSynth", "Piano"]
-const EDO = [3, 5,7,12]
+const EDO = [3, 5, 7, 12]
 
 const txID = window.location.href.split('/').pop() || "default";
+
 const hash = typeof txID === 'string' ? txID.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.floor(Math.random() * 1000000);
 
-const selectedInstrument = Instrument[hash % Instrument.length];   
+const selectedInstrument = Instrument[hash % Instrument.length];
 const selectedEDO = EDO[hash % EDO.length];
-toneshifts = Array.from({ length: 5}, (_, i) => i - 2)
+toneshifts = Array.from({ length: 5 }, (_, i) => i - 2)
 const toneshift = toneshifts[hash % toneshifts.length];
-const playbackSpeed = 0.7 + (hash % 1000000) / 1000000 * 0.8;
+
+console.log("hash", hash, typeof hash)
+const playbackSpeed = (((hash) % 7) / 10 + 0.7).toFixed(2)
 
 const nearbyEDOFreqs = Array.from({ length: 139 }, (_, i) => i - 70).map(offset => {
     const steps = offset;
@@ -75,7 +81,7 @@ const blobUrls = {};
 const synths = []
 const preparedTracks = []
 
-!async function(){
+!async function () {
     // Load Tone.js and Midi.js resources
     await Promise.all([
         fetch(TONEJS_URL).then(response => response.text()),
@@ -147,16 +153,11 @@ const preparedTracks = []
             clearInterval(waitForButton);
             playButton.addEventListener('click', (e) => {
                 document.querySelector('.cover-controls').innerHTML = `<div style="text-align:center">
-        <canvas id="spectrogram" width="512" height="512"></canvas>
-    </div>`
-                // <div style="text-align:center">
-                //     <canvas id="spectrogram" width="512" height="512"></canvas>
-                // </div>
-                
-                
+            <canvas id="spectrogram" width="512" height="512"></canvas>
+        </div>`
                 playSong(Tone.now())
 
-                
+
             });
         }
     }, 100);
@@ -164,15 +165,15 @@ const preparedTracks = []
 }()
 
 
-async function playSong(startTime){
+async function playSong(startTime) {
     // spectrogram
-    let intervalTime = (128/Tone.context.sampleRate)*100
-    
+    let intervalTime = (128 / Tone.context.sampleRate) * 100
+
     let fftInterval = setInterval(() => {
         const fftData = window.analyzer.getValue();
         // Store the FFT data
         window.fftWindows.push([...fftData]);
-        if(window.fftWindows.length > 512) {
+        if (window.fftWindows.length > 512) {
             window.fftWindows.shift();
         }
         // Uncomment to draw real time (can be slow)
@@ -219,8 +220,8 @@ function drawSpectrogram(hashID) {
         requestAnimationFrame(drawSpectrogram);
         return;
     }
-    
-    
+
+
     const sampleRate = Tone.context.sampleRate;
     const fftSize = analyzer.size * 2;
     const maxFreq = 6000;
@@ -243,7 +244,7 @@ function drawSpectrogram(hashID) {
     // Use these for your colors
     const baseHue = random1;
     const oppositeHue = random2;
-    const saturation = Math.floor((((random1+random2)*100)/720)*25)+75;
+    const saturation = Math.floor((((random1 + random2) * 100) / 720) * 25) + 75;
     const lightStart = 10;
     const lightEnd = 100;
 
@@ -263,12 +264,12 @@ function drawSpectrogram(hashID) {
             const diff = oppositeHue - baseHue;
             const shortestPath = ((diff + 180) % 360) - 180;
             const hue = (baseHue + shortestPath * fraction + 360) % 360;
-            
+
             const lightness = lightStart + (lightEnd - lightStart) * fraction;
 
             ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
-            const x = canvas.width/2 - Math.floor(numCols/2)*colScale + colIndex*colScale
+            const x = canvas.width / 2 - Math.floor(numCols / 2) * colScale + colIndex * colScale
             const y = canvas.height - (rowIndex + 1) * rowScale;
 
             ctx.fillRect(x, y, colScale, rowScale);
@@ -276,6 +277,4 @@ function drawSpectrogram(hashID) {
     });
     requestAnimationFrame(drawSpectrogram);
 }
-
-
 

@@ -8,20 +8,19 @@ import ordinal
 from analyze import source_seperation, analyze, midi2mp3
 
 # Init app by creating wallet
-ordinal.create_wallet()
-ordinal.topup()
+# ordinal.create_wallet()
+# ordinal.topup()
 
-st.session_state.current_balance = 0
-st.header("BTC balance")
-try:
-    balance_output, _ = ordinal.get_balance() # Replace with actual balance command
-    st.session_state.current_balance = balance_output   * 1e-8  
-    
-except:
-    st.session_state.current_balance = st.session_state.current_balance
+# st.session_state.current_balance = 0
+# st.header("BTC balance")
+# try:
+#     balance_output, _ = ordinal.get_balance() # Replace with actual balance command
+#     st.session_state.current_balance = balance_output   * 1e-8  
+# except:
+#     st.session_state.current_balance = st.session_state.current_balance
 
-st.info(f'{st.session_state.current_balance} BTC')
-st.markdown("---")
+# st.info(f'{st.session_state.current_balance} BTC')
+# st.markdown("---")
 st.header("Inscribe your melody file into blockchain")
 
 # File upload section
@@ -40,7 +39,8 @@ if uploaded_file is not None:
         f.write(uploaded_file.getbuffer())
     st.success(f"File saved successfully at {save_path}")
     
-    if uploaded_file.name.split(".")[-1] in ["mid"]:
+    if uploaded_file.name.split(".")[-1].lower() in ["mid"]:
+        st.session_state.midi_file = save_path
         mp3_file = midi2mp3(save_path)
         # Play MIDI audio
         audio_file = open(mp3_file, 'rb')
@@ -94,7 +94,7 @@ if uploaded_file is not None:
         status.info("Midify vocals... Done")     
         response = analyze(vocals_path)
         st.info(f"MIDI file: {response[0]}")
-        midi_file = response[0]
+        st.session_state.midi_file = response[0]
 
         with open(response[1], 'rb') as midi_audio:
             midi_audio_bytes = midi_audio.read()
@@ -107,7 +107,7 @@ if uploaded_file is not None:
         status2.info("Midify non vocals... Done")     
         response = analyze(no_vocals_path)
         st.info(f"MIDI file: {response[0]}")
-        midi_file = response[0]
+        st.session_state.midi_file = response[0]
 
         with open(response[1], 'rb') as midi_audio:
             midi_audio_bytes = midi_audio.read()
@@ -118,16 +118,19 @@ else:
     st.session_state.no_vocals_clicked = False
     st.session_state.seperated = False
     st.session_state.seperate_disabled = False
+    st.session_state.midi_file = ""
 
 
-if st.session_state.get('vocals_clicked', False) == True or st.session_state.get('no_vocals_clicked', False) == True:
+if st.session_state.midi_file != "":
     if st.button("Inscribe Melody"):
-        s = st.info("Inscribing melody... Please wait")
-        midi_file_rename = midi_file.replace('.mid', '.bin')
-        os.rename(midi_file, midi_file.replace('.mid', '.bin'))
+        midi_file = st.session_state.midi_file
+        s = st.info(f"Inscribing melody {midi_file}... Please wait")
+        midi_file_rename = midi_file.replace('.mid', '.bin').replace('.MID', '.bin')
+
+        os.rename(midi_file, midi_file_rename)
         result = ordinal.create_inscription(midi_file_rename)
         try:
-            st.info(f"ID: {result[0]["inscriptions"][0]["id"]} {result[0]["total_fees"]}")
+            st.info(f"ID: {result[0]["inscriptions"][0]["id"]} Fee: {result[0]["total_fees"]}")
             s.success("Melody inscribed successfully!")
         except:
             st.error(f"Failed to inscribe resource: {midi_file} {result}")
@@ -159,11 +162,11 @@ if st.button("Create Collection"):
                 file_name = '/tmp/index.html'
                 with open(file_name, 'w') as f:
                     f.write(f"""
-                    <script src="/content/5b9060bfc40d3e29919fba760dd30e89e1552f8fe55725f63ac992f100e48c23i0" id="{melody_id}" collection="{collection_name}" item-id="{i+1}"></script>
+                    <script src="/content/24f3d42802a0271fe0477b19f9a62c92178dcdcee785139a0e7f2f94ac923798i0" id="{melody_id}" collection="{collection_name}" item-id="{i+1}"></script>
                     """)
                 result = ordinal.create_inscription(file_name, generate_block = False)
                 try:
-                    st.info(f"ID: {result[0]["inscriptions"][0]["id"]} {result[0]["total_fees"]}")
+                    st.info(f"ID: {result[0]["inscriptions"][0]["id"]} Fee: {result[0]["total_fees"]}")
                 except:
                     st.error(f"Failed to inscribe resource: {melody_id} {result}")
             ordinal.topup(1)

@@ -1,81 +1,82 @@
-{/* <script src="./dist/bundle.min.js" id="123456789" collection="Amazing Grace" item-id="1"></script> */}
+document.addEventListener('DOMContentLoaded', () => {
+        // Get the script tag and its attributes
+        const scriptTag = document.getElementsByTagName('script')[0];
+        const contentId = scriptTag ? scriptTag.getAttribute('id') : null;
+        const collection = scriptTag ? scriptTag.getAttribute('collection') : null;
+        const itemId = scriptTag ? scriptTag.getAttribute('item-id') : null;
 
-// Get the script tag and its attributes
-const scriptTag = document.getElementsByTagName('script')[0];
-const contentId = scriptTag ? scriptTag.getAttribute('id') : null;
-const collection = scriptTag ? scriptTag.getAttribute('collection') : null;
-const itemId = scriptTag ? scriptTag.getAttribute('item-id') : null;
-
-console.log('Script Tag ID:', contentId);
-console.log('Collection:', collection); 
-console.log('Item ID:', itemId);
-
-const SRC_MIDI = "./src/audio/vocals_melody.mid"
-const TONEJS_URL = "./src/js/Tone.js"
-const MIDI_URL = "./src/js/Midi.js"
-const baseURL = "https://tonejs.github.io/audio/salamander/";
-const SAMPLE_URL = {
-    'A0': baseURL + "A0.mp3",
-    'C1': baseURL + "C1.mp3",
-    'D#1': baseURL + "Ds1.mp3",
-    'F#1': baseURL + "Fs1.mp3",
-    'A1': baseURL + "A1.mp3",
-    'C2': baseURL + "C2.mp3",
-    'D#2': baseURL + "Ds2.mp3",
-    'F#2': baseURL + "Fs2.mp3",
-    'A2': baseURL + "A2.mp3",
-    'C3': baseURL + "C3.mp3",
-    'D#3': baseURL + "Ds3.mp3",
-    'F#3': baseURL + "Fs3.mp3",
-    'A3': baseURL + "A3.mp3",
-    'C4': baseURL + "C4.mp3",
-    'D#4': baseURL + "Ds4.mp3",
-    'F#4': baseURL + "Fs4.mp3",
-    'A4': baseURL + "A4.mp3",
-    'C5': baseURL + "C5.mp3",
-    'D#5': baseURL + "Ds5.mp3",
-    'F#5': baseURL + "Fs5.mp3",
-    'A5': baseURL + "A5.mp3",
-    'C6': baseURL + "C6.mp3",
-    'D#6': baseURL + "Ds6.mp3",
-    'F#6': baseURL + "Fs6.mp3",
-    'A6': baseURL + "A6.mp3",
-    'C7': baseURL + "C7.mp3",
-    'D#7': baseURL + "Ds7.mp3",
-    'F#7': baseURL + "Fs7.mp3",
-    'A7': baseURL + "A7.mp3",
-    'C8': baseURL + "C8.mp3",
-}
-const noteNames = Object.keys(SAMPLE_URL);
-const Instrument = ["AMSynth", "DuoSynth", "MembraneSynth", "FMSynth", "MonoSynth", "Piano"]
-const EDO = [5,7,12]
-
-const txID = window.location.href.split('/').pop() || "default";
-const hash = typeof txID === 'string' ? txID.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.floor(Math.random() * 1000000);
-
-const selectedInstrument = Instrument[hash % Instrument.length];   
-const selectedEDO = EDO[hash % EDO.length];
-toneshifts = Array.from({ length: 5}, (_, i) => i - 2)
-const toneshift = toneshifts[hash % toneshifts.length];
-const playbackSpeed = 0.7 + (hash % 1000000) / 1000000 * 0.8;
-
-const nearbyEDOFreqs = Array.from({ length: 139 }, (_, i) => i - 70).map(offset => {
-    const steps = offset;
-    return 440 * Math.pow(2, steps / selectedEDO);
-});
-
-require("./draw-cover.js")(collection, itemId, {
-    toneshift: toneshift,
-    selectedEDO: selectedEDO,
-    selectedInstrument: selectedInstrument,
-    nearbyEDOFreqs: nearbyEDOFreqs,
-    toneshifts: toneshifts,
-    playbackSpeed: playbackSpeed,
+        console.log('Scrisspt Tag ID:', contentId);
+        console.log('Collection:', collection); 
+        console.log('Item ID:', itemId);
 })
 
-const blobUrls = {};
-const synths = []
-const preparedTracks = []
+    const SRC_MIDI = "./src/audio/vocals_melody.mid"
+    const TONEJS_URL = "./src/js/Tone.js"
+    const MIDI_URL = "./src/js/Midi.js"
+    const baseURL = "https://tonejs.github.io/audio/salamander/";
+    const SAMPLE_URL = {
+        'A0': baseURL + "A0.mp3",
+        'C1': baseURL + "C1.mp3",
+        'D#1': baseURL + "Ds1.mp3",
+        'F#1': baseURL + "Fs1.mp3",
+        'A1': baseURL + "A1.mp3",
+        'C2': baseURL + "C2.mp3",
+        'D#2': baseURL + "Ds2.mp3",
+        'F#2': baseURL + "Fs2.mp3",
+        'A2': baseURL + "A2.mp3",
+        'C3': baseURL + "C3.mp3",
+        'D#3': baseURL + "Ds3.mp3",
+        'F#3': baseURL + "Fs3.mp3",
+        'A3': baseURL + "A3.mp3",
+        'C4': baseURL + "C4.mp3",
+        'D#4': baseURL + "Ds4.mp3",
+        'F#4': baseURL + "Fs4.mp3",
+        'A4': baseURL + "A4.mp3",
+        'C5': baseURL + "C5.mp3",
+        'D#5': baseURL + "Ds5.mp3",
+        'F#5': baseURL + "Fs5.mp3",
+        'A5': baseURL + "A5.mp3",
+        'C6': baseURL + "C6.mp3",
+        'D#6': baseURL + "Ds6.mp3",
+        'F#6': baseURL + "Fs6.mp3",
+        'A6': baseURL + "A6.mp3",
+        'C7': baseURL + "C7.mp3",
+        'D#7': baseURL + "Ds7.mp3",
+        'F#7': baseURL + "Fs7.mp3",
+        'A7': baseURL + "A7.mp3",
+        'C8': baseURL + "C8.mp3",
+    }
+    const noteNames = Object.keys(SAMPLE_URL);
+    const Instrument = ["AMSynth", "DuoSynth", "MembraneSynth", "FMSynth", "MonoSynth", "Piano"]
+    const EDO = [5,7,12]
+
+    const txID = window.location.href.split('/').pop() || "default";
+    const hash = typeof txID === 'string' ? txID.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.floor(Math.random() * 1000000);
+
+    const selectedInstrument = Instrument[hash % Instrument.length];   
+    const selectedEDO = EDO[hash % EDO.length];
+    toneshifts = Array.from({ length: 5}, (_, i) => i - 2)
+    const toneshift = toneshifts[hash % toneshifts.length];
+    const playbackSpeed = 0.7 + (hash % 1000000) / 1000000 * 0.8;
+
+    const nearbyEDOFreqs = Array.from({ length: 139 }, (_, i) => i - 70).map(offset => {
+        const steps = offset;
+        return 440 * Math.pow(2, steps / selectedEDO);
+    });
+
+    require("./draw-cover.js")(collection, itemId, {
+        toneshift: toneshift,
+        selectedEDO: selectedEDO,
+        selectedInstrument: selectedInstrument,
+        nearbyEDOFreqs: nearbyEDOFreqs,
+        toneshifts: toneshifts,
+        playbackSpeed: playbackSpeed,
+    })
+
+    const blobUrls = {};
+    const synths = []
+    const preparedTracks = []
+
 
 !async function(){
     // Load Tone.js and Midi.js resources
